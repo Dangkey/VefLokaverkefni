@@ -36,8 +36,10 @@ var material = new THREE.MeshPhysicalMaterial({
   vertexColors: THREE.FaceColors
 });
 var cube = new THREE.Mesh(geometry, material);
+var cube2 = cube.clone();
 scene.add(cube);
-
+cube2.position.y = 1
+scene.add(cube2);
 
 // create lights
 
@@ -53,7 +55,7 @@ camera.position.z = 5;
 var render = function() {
   requestAnimationFrame(render);
   cube.rotation.x += 0.02;
-  cube.rotation.y += 0.02;
+  cube2.rotation.y += 0.02;
   renderer.render(scene, camera);
 };
 
