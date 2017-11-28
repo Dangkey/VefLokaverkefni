@@ -1,62 +1,107 @@
-var width = window.innerWidth;
-var height = window.innerHeight;
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(25, width / height, 0.1, 1000);
+var container;
 
-var renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
-renderer.setSize(width, height);
-document.body.appendChild(renderer.domElement);
-renderer.setClearColor(0xf0f0f0, 1);
+			var camera, scene, renderer;
 
-window.addEventListener('resize', onWindowResize, false);
+			var geometry, group;
 
-function onWindowResize() {
-  windowHalfX = window.innerWidth / 2;
-  windowHalfY = window.innerHeight / 2;
+			var mouseX = 0, mouseY = 0;
 
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
+			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
-controls = new THREE.OrbitControls(camera, renderer.domElement);
-// create the cube
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-for (var i = 0; i < geometry.faces.length; i += 2) {
+			init();
+			animate();
 
-  var hex = Math.random() * 0xffffff;
-  geometry.faces[i].color.setHex(hex);
-  geometry.faces[i + 1].color.setHex(hex);
+			
+			function init() {
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
 
-}
-var material = new THREE.MeshPhysicalMaterial({
-  vertexColors: THREE.FaceColors
-});
-var cube = new THREE.Mesh(geometry, material);
-var cube2 = cube.clone();
-scene.add(cube);
-cube2.position.y = 1
-scene.add(cube2);
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 6000;
 
-// create lights
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xffffff );
+				scene.fog = new THREE.Fog( 0xffffff, 1, 10000 );
 
-scene.add(new THREE.AmbientLight(0xffffff));
-var light = new THREE.PointLight(0xffffff, 6, 40);
-light.position.set(20, 20, 20);
-scene.add(light);
+				var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+				var material = new THREE.MeshNormalMaterial();
+				group = new THREE.Group();
+				
+				
 
-// set the camera
-camera.position.z = 5;
+				for ( var i = 0; i < 1000; i ++ ) {
 
-// define an animation loop
-var render = function() {
-  requestAnimationFrame(render);
-  cube.rotation.x += 0.02;
-  cube2.rotation.y += 0.02;
-  renderer.render(scene, camera);
-};
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh.position.x = Math.random() * 2000 - 1000;
+					mesh.position.y = Math.random() * 2000 - 1000;
+					mesh.position.z = Math.random() * 2000 - 1000;
 
-render();
+					mesh.rotation.x = 30;
+					mesh.rotation.y = 30;
+
+					mesh.matrixAutoUpdate = false;
+					mesh.updateMatrix();
+
+					group.add( mesh );
+
+				}
+
+				scene.add( group );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				container.appendChild( renderer.domElement );
+
+
+			//
+
+			window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+			controls = new THREE.OrbitControls(camera, renderer.domElement);
+			function onDocumentMouseMove(event) {
+
+				mouseX = ( event.clientX - windowHalfX ) * 10;
+				mouseY = ( event.clientY - windowHalfY ) * 10;
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+				
+				render();
+
+			}
+
+			function render() {
+ 				
+
+				camera.lookAt( scene.position );
+
+				group.rotation.x += 0.03;
+				group.rotation.y += 0.03;
+				group.rotation.z += 0.03;
+
+				renderer.render( scene, camera );
+
+			}
