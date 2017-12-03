@@ -3,9 +3,12 @@
 			Physijs.scripts.ammo = 'ammo.js';
 
 			//Variables
-			var container, camera, scene, renderer, geometry, group;
+			var container, camera, scene, renderer, geometry, group, controls, mesh;
 			var loader = new THREE.TextureLoader();
-
+			var objects = [];
+			// Custom global variables
+			var mouse = {x: 0, y: 0};
+			
 
 			//breytur sem ná í hálfa stærðina á browsernum sem verður notað í function seinna
 			var windowHalfX = window.innerWidth / 2;
@@ -31,6 +34,8 @@
 			    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 			    camera.position.z = 800;
 				camera.position.y = 500;
+
+				
 
 				//Loadar inn textures sem við notum
 			    var sky = loader.load('textures/sky.jpg');
@@ -65,32 +70,37 @@
 				//lætur texturið á pallinum ná alla leiðina í staðinn fyrir að vera bara part af honum
 			    ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
 			    ground_material.map.repeat.set(10, 10);
+			     ground_material.side = THREE.DoubleSide;
 
 			    // býr til pallinn
-			    ground = new Physijs.BoxMesh(
-			        new THREE.BoxGeometry(1000, 1, 1000),
+			    ground = new Physijs.ConeMesh(
+			        new THREE.ConeGeometry(400,600,100,1),
+			        
 			        ground_material,
+			        
 			        0 // mass
 			    );
+			    ground.rotation.x = Math.PI / 1;
 			    scene.add(ground);
 
 				//breytur sem við notum þegar við búum til Kassana, geometry er notað til að gera Kassana,
 				// material er notað til þess að setja texture á kassana.
 			    var geometry = new THREE.BoxGeometry(20, 20, 20);
 			    var material = new THREE.MeshNormalMaterial();
-
+			    
 
 				//for loopa sem býr til mesh úr geometry og material, og gefur hverju meshi random staðsetningu.
-			    for (var i = 0; i < 500; i++) {
-			        var mesh = new Physijs.BoxMesh(geometry, material);
+			    for (var i = 0; i < 200; i++) {
+			        mesh = new Physijs.BoxMesh(geometry, material);
 			        mesh.__dirtyPosition = true;
 
 			        mesh.position.x = Math.floor(Math.random() * 40 - 20) * 20;
 			        mesh.position.y = Math.floor(Math.random() * 40) * 20 + 10;
 			        mesh.position.z = Math.floor(Math.random() * 40 - 20) * 20;
-
+			        objects.push( mesh );
 			        scene.add(mesh);
 			    }
+			    raycaster = new THREE.Raycaster();
 
 				//býr til renderer sem er notaður til þess að birta allt sem við búum til.
 			    renderer = new THREE.WebGLRenderer({
@@ -104,11 +114,14 @@
 			    controls = new THREE.OrbitControls(camera, renderer.domElement);
 				//setur rendererinn í Divið sem við bjuggum til áðan
 			    container.appendChild(renderer.domElement);
-
+			    //canvas.addEventListener('mousemove', onMouseMove, true);
 				//event listener sem lætur rendererinn minnkast ef browserinn er minnkaður
+				//document.addEventListener( 'mousemove', onMouseMove, false );	
 			    window.addEventListener('resize', onWindowResize, false);
-
+			    
+				//
 			}
+
 			//functionið til að minnka rendererinn
 			function onWindowResize() {
 			    windowHalfX = window.innerWidth / 2;
@@ -116,18 +129,43 @@
 			    camera.aspect = window.innerWidth / window.innerHeight;
 			    camera.updateProjectionMatrix();
 			    renderer.setSize(window.innerWidth, window.innerHeight);
-			}
+			}/*
+			function onMouseMove( event ) {
 
+				
+			// Update the mouse variable
+				
+				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+ 			// Make the sphere follow the mouse
+  				var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+				vector.unproject( camera );
+				var dir = vector.sub( camera.position ).normalize();
+				var distance = - camera.position.z / dir.z;
+				var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+				mesh.position.copy(pos);
+
+			}
+			
+*/
 			//kallar í renderinn og sýnir animations
 			function animate() {
 			    requestAnimationFrame(animate);
 			    render();
 			}
+			
+			
 			//functionið sem setur allt í rendererinn og simulatar physics á sceneinu
 			function render() {
+
+				// find intersections
+				/*
+				raycaster.setFromCamera( mouse, camera );
+				*/
 			    scene.simulate();
 			    renderer.autoClear = false;
-			    renderer.clear();
-			    renderer.render(bakgrunnurScene, bakgrunnurCam);
-			    renderer.render(scene, camera);
+			    renderer.clear();	    
+				renderer.render(bakgrunnurScene, bakgrunnurCam);
+				renderer.render(scene, camera);
 			}
