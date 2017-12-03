@@ -11,3 +11,4 @@ Notuðum PhysiJS, OrbitalControls.js og Three.js
 
 í index er bara kallað í javascriptirnar
 
+Næstu skrefinn væru að búa til leik úr þessu þar sem þú gætir hoppað upp boxinn til að reyna komast upp í toppinn
