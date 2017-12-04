@@ -81,6 +81,7 @@
 			        0 // mass
 			    );
 			    ground.rotation.x = Math.PI / 1;
+			    ground.position.x = -300;
 			    scene.add(ground);
 
 				//breytur sem við notum þegar við búum til Kassana, geometry er notað til að gera Kassana,
